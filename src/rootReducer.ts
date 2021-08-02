@@ -42,6 +42,10 @@ export const rootReducer = (
       }
     }
 
+    case 'RESET': {
+      return initialState
+    }
+
     default:
       return state
   }

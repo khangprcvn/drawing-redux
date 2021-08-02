@@ -1,10 +1,13 @@
 import * as React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { beginStroke, updateStroke, endStroke } from './actions'
+import { beginStroke, updateStroke, endStroke, reset } from './actions'
 import { currentStrokeSelector } from './selectors'
 
 import { drawStroke } from './canvasUtils'
+
+const WIDTH = 1024
+const HEIGHT = 768
 
 const App = () => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
@@ -20,6 +23,16 @@ const App = () => {
       context: canvas?.getContext('2d'),
     }
   }
+
+  React.useEffect(() => {
+    const { canvas, context } = getCanvasWithContext()
+
+    if (!canvas || !context) return
+
+    requestAnimationFrame(() => {
+      drawStroke(context, currentStroke.points, currentStroke.color)
+    })
+  }, [currentStroke])
 
   const startDrawing = ({
     nativeEvent,
@@ -41,22 +54,21 @@ const App = () => {
     }
   }
 
-  React.useEffect(() => {
+  const handleClearCanvas = () => {
     const { canvas, context } = getCanvasWithContext()
 
     if (!canvas || !context) return
 
-    requestAnimationFrame(() => {
-      drawStroke(context, currentStroke.points, currentStroke.color)
-    })
-  }, [currentStroke])
+    context.clearRect(0, 0, WIDTH, HEIGHT)
+    dispatch(reset())
+  }
 
   return (
     <div className="window">
       <div className="title-bar">
         <div className="title-bar-text">Redux Paint</div>
         <div className="title-bar-controls">
-          <button aria-label="Close" />
+          <button aria-label="Close" onClick={handleClearCanvas} />
         </div>
       </div>
       <canvas
